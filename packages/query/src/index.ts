@@ -743,31 +743,32 @@ const generateMutatorReturnType = ({
   dataType: unknown;
   variableType: unknown;
 }) => {
-  if (outputClient === OutputClient.REACT_QUERY) {
-    return `: UseMutationResult<
+  let genericReturnType;
+  switch (outputClient) {
+    case OutputClient.REACT_QUERY:
+      genericReturnType = 'UseMutationResult';
+      break;
+    case OutputClient.SVELTE_QUERY:
+      genericReturnType = 'CreateMutationResult';
+      break;
+    case OutputClient.VUE_QUERY:
+      genericReturnType = 'UseMutationReturnType';
+      break;
+    default:
+      genericReturnType = '';
+      break;
+  }
+
+  if (!genericReturnType) {
+    return '';
+  }
+
+  return `: ${genericReturnType}<
         Awaited<ReturnType<${dataType}>>,
         TError,
         ${variableType},
         TContext
       >`;
-  }
-  if (outputClient === OutputClient.SVELTE_QUERY) {
-    return `: CreateMutationResult<
-        Awaited<ReturnType<${dataType}>>,
-        TError,
-        ${variableType},
-        TContext
-      >`;
-  }
-  if (outputClient === OutputClient.VUE_QUERY) {
-    return `: UseMutationReturnType<
-        Awaited<ReturnType<${dataType}>>,
-        TError,
-        ${variableType},
-        TContext
-      >`;
-  }
-  return '';
 };
 
 const getQueryOptions = ({
